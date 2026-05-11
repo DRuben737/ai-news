@@ -1,15 +1,17 @@
 import OpenAI from "openai";
 
-const client = new OpenAI({
-  apiKey: process.env.LLM_API_KEY,
-
-  baseURL:
-    process.env.LLM_BASE_URL,
-});
-
 export async function callLLM(
   prompt: string
 ) {
+  const client = new OpenAI({
+    apiKey:
+      process.env.LLM_API_KEY ||
+      "test-key",
+
+    baseURL:
+      process.env.LLM_BASE_URL,
+  });
+
   const response =
     await client.chat.completions.create({
       model:
