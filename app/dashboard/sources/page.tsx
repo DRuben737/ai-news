@@ -20,7 +20,7 @@ export default function SourcesPage() {
 
   async function loadSources() {
     const res = await fetch(
-      "/api/sources"
+      `${window.location.origin}/api/sources`
     );
 
     const data = await res.json();
@@ -29,7 +29,9 @@ export default function SourcesPage() {
   }
 
   async function addSource() {
-    await fetch("/api/sources", {
+    await fetch(
+      `${window.location.origin}/api/sources`,
+      {
       method: "POST",
 
       headers: {
@@ -67,7 +69,9 @@ export default function SourcesPage() {
       if (!sourceName || !sourceUrl)
         continue;
 
-      await fetch("/api/sources", {
+      await fetch(
+        `${window.location.origin}/api/sources`,
+        {
         method: "POST",
 
         headers: {
@@ -134,7 +138,9 @@ export default function SourcesPage() {
       if (!title || !xmlUrl)
         continue;
 
-      await fetch("/api/sources", {
+      await fetch(
+        `${window.location.origin}/api/sources`,
+        {
         method: "POST",
 
         headers: {
@@ -157,7 +163,9 @@ export default function SourcesPage() {
   async function deleteSource(
     id: number
   ) {
-    await fetch("/api/sources", {
+    await fetch(
+      `${window.location.origin}/api/sources`,
+      {
       method: "DELETE",
 
       headers: {
@@ -177,7 +185,9 @@ export default function SourcesPage() {
     id: number,
     enabled: boolean
   ) {
-    await fetch("/api/sources", {
+    await fetch(
+      `${window.location.origin}/api/sources`,
+      {
       method: "PATCH",
 
       headers: {
