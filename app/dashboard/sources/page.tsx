@@ -90,7 +90,27 @@ export default function SourcesPage() {
   async function importOPML() {
     if (!opmlFile) return;
 
-    const text = await opmlFile.text();
+    const text =
+      await new Promise<string>(
+        (resolve, reject) => {
+          const reader =
+            new FileReader();
+
+          reader.onload = () =>
+            resolve(
+              reader.result as string
+            );
+
+          reader.onerror = () =>
+            reject(
+              new Error(
+                "Failed to read file"
+              )
+            );
+
+          reader.readAsText(opmlFile);
+        }
+      );
 
     const parser = new DOMParser();
 
@@ -184,13 +204,13 @@ export default function SourcesPage() {
         RSS Sources
       </h1>
 
-      <div className="space-y-3 border p-4 rounded-xl bg-white">
+      <div className="space-y-3 border p-4 rounded-xl bg-white shadow-sm hover:shadow-md transition">
         <div className="text-lg font-semibold">
           Add Single RSS
         </div>
 
         <input
-          className="border p-2 w-full rounded-lg"
+          className="border p-2 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-black/20 transition"
           placeholder="Name"
           value={name}
           onChange={(e) =>
@@ -199,7 +219,7 @@ export default function SourcesPage() {
         />
 
         <input
-          className="border p-2 w-full rounded-lg"
+          className="border p-2 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-black/20 transition"
           placeholder="RSS URL"
           value={url}
           onChange={(e) =>
@@ -208,14 +228,14 @@ export default function SourcesPage() {
         />
 
         <button
-          className="bg-black text-white px-4 py-2 rounded-lg"
+          className="bg-black text-white px-4 py-2 rounded-lg hover:opacity-80 transition cursor-pointer"
           onClick={addSource}
         >
           Add RSS
         </button>
       </div>
 
-      <div className="space-y-3 border p-4 rounded-xl bg-white">
+      <div className="space-y-3 border p-4 rounded-xl bg-white shadow-sm hover:shadow-md transition">
         <div className="text-lg font-semibold">
           Bulk Import RSS
         </div>
@@ -226,7 +246,7 @@ export default function SourcesPage() {
         </div>
 
         <textarea
-          className="border p-3 w-full h-48 rounded-lg"
+          className="border p-3 w-full h-48 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition"
           placeholder={
             "FAA,https://www.faa.gov/rss/news_updates.xml\nNTSB,https://www.ntsb.gov/news/rss.xml"
           }
@@ -239,7 +259,7 @@ export default function SourcesPage() {
         />
 
         <button
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer"
           onClick={addBulkSources}
         >
           Import RSS List
@@ -263,7 +283,7 @@ export default function SourcesPage() {
           />
 
           <button
-            className="bg-black text-white px-4 py-2 rounded-lg"
+            className="bg-black text-white px-4 py-2 rounded-lg hover:opacity-80 transition cursor-pointer"
             onClick={importOPML}
           >
             Import OPML File
@@ -275,7 +295,7 @@ export default function SourcesPage() {
         {sources.map((s) => (
           <div
             key={s.id}
-            className="border rounded-xl p-4 space-y-3 bg-white shadow-sm"
+            className="border rounded-xl p-4 space-y-3 bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition duration-200"
           >
             <div className="font-medium">
               {s.name}
@@ -302,7 +322,7 @@ export default function SourcesPage() {
 
             <div className="flex gap-2">
               <button
-                className="border px-3 py-1 rounded-lg"
+                className="border px-3 py-1 rounded-lg hover:bg-gray-100 transition cursor-pointer"
                 onClick={() =>
                   toggleSource(
                     s.id,
@@ -316,7 +336,7 @@ export default function SourcesPage() {
               </button>
 
               <button
-                className="border px-3 py-1 rounded-lg text-red-500"
+                className="border px-3 py-1 rounded-lg text-red-500 hover:bg-red-50 transition cursor-pointer"
                 onClick={() =>
                   deleteSource(s.id)
                 }
