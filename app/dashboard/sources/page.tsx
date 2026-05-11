@@ -12,6 +12,12 @@ export default function SourcesPage() {
   const [url, setUrl] =
     useState("");
 
+  const [bulkInput, setBulkInput] =
+    useState("");
+
+  const [opmlFile, setOpmlFile] =
+    useState<File | null>(null);
+
   async function loadSources() {
     const res = await fetch(
       "/api/sources"
@@ -39,6 +45,91 @@ export default function SourcesPage() {
 
     setName("");
     setUrl("");
+
+    loadSources();
+  }
+
+  async function addBulkSources() {
+    const lines = bulkInput
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    for (const line of lines) {
+      const parts = line.split(",");
+
+      const sourceName =
+        parts[0]?.trim();
+
+      const sourceUrl =
+        parts[1]?.trim();
+
+      if (!sourceName || !sourceUrl)
+        continue;
+
+      await fetch("/api/sources", {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+          name: sourceName,
+          url: sourceUrl,
+        }),
+      });
+    }
+
+    setBulkInput("");
+
+    loadSources();
+  }
+
+  async function importOPML() {
+    if (!opmlFile) return;
+
+    const text = await opmlFile.text();
+
+    const parser = new DOMParser();
+
+    const xml = parser.parseFromString(
+      text,
+      "text/xml"
+    );
+
+    const outlines = Array.from(
+      xml.querySelectorAll("outline")
+    );
+
+    for (const outline of outlines) {
+      const title =
+        outline.getAttribute("title") ||
+        outline.getAttribute("text");
+
+      const xmlUrl =
+        outline.getAttribute("xmlUrl");
+
+      if (!title || !xmlUrl)
+        continue;
+
+      await fetch("/api/sources", {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+          name: title,
+          url: xmlUrl,
+        }),
+      });
+    }
+
+    setOpmlFile(null);
 
     loadSources();
   }
@@ -93,9 +184,13 @@ export default function SourcesPage() {
         RSS Sources
       </h1>
 
-      <div className="space-y-2">
+      <div className="space-y-3 border p-4 rounded-xl bg-white">
+        <div className="text-lg font-semibold">
+          Add Single RSS
+        </div>
+
         <input
-          className="border p-2 w-full"
+          className="border p-2 w-full rounded-lg"
           placeholder="Name"
           value={name}
           onChange={(e) =>
@@ -104,7 +199,7 @@ export default function SourcesPage() {
         />
 
         <input
-          className="border p-2 w-full"
+          className="border p-2 w-full rounded-lg"
           placeholder="RSS URL"
           value={url}
           onChange={(e) =>
@@ -113,18 +208,74 @@ export default function SourcesPage() {
         />
 
         <button
-          className="bg-black text-white px-4 py-2"
+          className="bg-black text-white px-4 py-2 rounded-lg"
           onClick={addSource}
         >
-          Add
+          Add RSS
         </button>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3 border p-4 rounded-xl bg-white">
+        <div className="text-lg font-semibold">
+          Bulk Import RSS
+        </div>
+
+        <div className="text-sm text-gray-500">
+          Paste:
+          Name,https://rss-url.xml
+        </div>
+
+        <textarea
+          className="border p-3 w-full h-48 rounded-lg"
+          placeholder={
+            "FAA,https://www.faa.gov/rss/news_updates.xml\nNTSB,https://www.ntsb.gov/news/rss.xml"
+          }
+          value={bulkInput}
+          onChange={(e) =>
+            setBulkInput(
+              e.target.value
+            )
+          }
+        />
+
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+          onClick={addBulkSources}
+        >
+          Import RSS List
+        </button>
+
+        <div className="border-t pt-4 space-y-3">
+          <div className="text-lg font-semibold">
+            Import OPML
+          </div>
+
+          <input
+            type="file"
+            accept=".opml,.xml,text/xml"
+            onChange={(e) => {
+              const file =
+                e.target.files?.[0];
+
+              if (file)
+                setOpmlFile(file);
+            }}
+          />
+
+          <button
+            className="bg-black text-white px-4 py-2 rounded-lg"
+            onClick={importOPML}
+          >
+            Import OPML File
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-3">
         {sources.map((s) => (
           <div
             key={s.id}
-            className="border p-3 space-y-2"
+            className="border rounded-xl p-4 space-y-3 bg-white shadow-sm"
           >
             <div className="font-medium">
               {s.name}
@@ -151,7 +302,7 @@ export default function SourcesPage() {
 
             <div className="flex gap-2">
               <button
-                className="border px-2 py-1"
+                className="border px-3 py-1 rounded-lg"
                 onClick={() =>
                   toggleSource(
                     s.id,
@@ -165,7 +316,7 @@ export default function SourcesPage() {
               </button>
 
               <button
-                className="border px-2 py-1 text-red-500"
+                className="border px-3 py-1 rounded-lg text-red-500"
                 onClick={() =>
                   deleteSource(s.id)
                 }

@@ -1,4 +1,3 @@
-
 # ✈️ CFII Aviation Intelligence System
 
 一个面向：
@@ -41,6 +40,10 @@
 - 启用/禁用 RSS
 - 查看抓取状态
 - 查看抓取错误
+- 批量导入 RSS
+- OPML 导入
+- Feedly/Inoreader OPML 支持
+- 自动去重导入
 
 ---
 
@@ -106,6 +109,8 @@
 - 类型分类
 - Markdown
 - 航空安全卡片 UI
+- 自动更新 Docker 部署
+- Watchtower 自动拉取镜像
 
 ---
 
@@ -384,9 +389,10 @@ docker compose up -d
 
 第一次启动会：
 
+- 自动拉取 GHCR Docker 镜像
 - 自动创建 PostgreSQL
-- 自动 build Next.js
-- 自动启动容器
+- 自动启动 Next.js
+- 自动创建容器网络
 
 ---
 
@@ -434,6 +440,34 @@ http://192.168.1.100:3000
 
 ---
 
+## 7. 自动更新（Watchtower）
+
+系统已内置：
+
+```txt
+Watchtower
+```
+
+作用：
+
+- 自动检测新 Docker 镜像
+- 自动 pull 最新版本
+- 自动重启容器
+- 实现 NAS 自动更新
+
+因此后续升级只需要：
+
+```bash
+git push
+```
+
+GitHub Actions 会自动：
+
+1. Build Docker Image
+2. Push 到 GHCR
+3. NAS 自动更新
+---
+
 # NAS 自动定时任务
 
 系统不会自动抓取。
@@ -467,6 +501,32 @@ chmod +x scripts/cron.sh
 ---
 
 # 推荐 RSS
+
+## OPML 推荐来源
+
+支持导入：
+
+- Feedly OPML
+- Inoreader OPML
+- TinyTinyRSS OPML
+- RSSHub OPML
+- Google Reader OPML
+
+后台导入页面：
+
+```txt
+/dashboard/sources
+```
+
+支持：
+
+- 单条 RSS 添加
+- 批量粘贴导入
+- OPML 文件上传
+- 自动解析 xmlUrl
+- 自动去重
+
+---
 
 推荐航空类：
 
@@ -565,21 +625,23 @@ OLLAMA_URL
 # 当前系统架构
 
 ```txt
-RSS
- ↓
-Fetch
- ↓
-Article
- ↓
-AI Score
- ↓
+RSS / OPML
+        ↓
+RSS Fetcher
+        ↓
+Article Storage
+        ↓
+AI Score Engine
+        ↓
 AI Summary
- ↓
+        ↓
 Push Memory
- ↓
-AI Digest
- ↓
-Feishu Card
+        ↓
+Digest Generator
+        ↓
+Feishu Card UI
+        ↓
+Docker Auto Update
 ```
 
 ---
