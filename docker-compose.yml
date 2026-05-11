@@ -1,0 +1,47 @@
+
+
+version: "3.9"
+
+services:
+  app:
+    build: .
+
+    container_name: cfii-intel
+
+    restart: always
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/ainews
+
+      FEISHU_WEBHOOK_URL: ${FEISHU_WEBHOOK_URL}
+
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+
+      OLLAMA_URL: ${OLLAMA_URL}
+
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16-alpine
+
+    container_name: cfii-postgres
+
+    restart: always
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ainews
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

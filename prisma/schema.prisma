@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Source {
+  id          Int       @id @default(autoincrement())
+
+  name        String
+
+  url         String    @unique
+
+  enabled     Boolean   @default(true)
+
+  lastFetched DateTime?
+
+  lastError   String?
+
+  createdAt   DateTime  @default(now())
+
+  articles    Article[]
+}
+
+model Article {
+  id            Int       @id @default(autoincrement())
+
+  title         String
+
+  url           String    @unique
+
+  content       String?
+
+  summary       String?
+
+  publishedAt   DateTime?
+
+  createdAt     DateTime  @default(now())
+
+  sourceId      Int
+
+  source        Source    @relation(fields: [sourceId], references: [id])
+}
+
+model Digest {
+  id          Int       @id @default(autoincrement())
+
+  title       String
+
+  content     String
+
+  createdAt   DateTime  @default(now())
+}
+
+model PushLog {
+  id          Int       @id @default(autoincrement())
+
+  platform    String
+
+  status      String
+
+  message     String?
+
+  createdAt   DateTime  @default(now())
+}
+
+model Prompt {
+  id        Int      @id @default(autoincrement())
+
+  key       String   @unique
+
+  content   String
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+model Config {
+  id        Int      @id @default(autoincrement())
+
+  key       String   @unique
+
+  value     String
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model PushMemory {
+  id        Int      @id @default(autoincrement())
+
+  articleId Int      @unique
+
+  title     String
+
+  createdAt DateTime @default(now())
+}
